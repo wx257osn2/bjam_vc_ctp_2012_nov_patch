@@ -1,0 +1,42 @@
+bjamでVisual C++ Compiler November 2012 Customer Technology Previewsを使いたい人向けのパッチ(長い)
+
+
+・人柱向け  正しく動作しなくても泣かない
+・パッチの改行文字コードとか気をつけるといいかも(Git使ってるせいでLFになってる)
+・Boost 1.53.0時点で作ったのでディレクトリが云々、先々使えるかはわからない云々
+・VC 2012 Nov CTPをMSVC12.0扱いでbjamに登録します、先々製品版出た時云々(そんな時までCTP使い続ける人いないだろうけど)
+・64bit版なので32bitのWindows使ってる人はディレクトリ名自分でいじってください  わからないなら諦めてください
+
+1. <BOOST_DIR>/tools/build/vs/tools/msvc.jamにパッチを当てます
+   一応パッチ当てられなくなってもいいように具体的に言うと、
+     msvc.jam 630行付近の
+      local rule auto-detect-toolset-versions ( )
+     内で
+      # Get installation paths from the registry.
+     とある下のforが終わった所に
+      local vc-path ;
+      vc-path = [ path.join [ path.make-NT "C:\\Program Files (x86)\\Microsoft Visual C++ Compiler Nov 2012 CTP" ] "bin" ] ;
+      register-configuration 12.0 : [ path.native $(vc-path[1]) ] ;
+     を挿入してCTPを無理やりMSVC12.0として登録します。
+
+2. <Program Files>/Microsoft Visual C++ Compiler Nov 2012 CTP 以下に必要なファイルをコピーします
+   <Program Files>/Microsoft Visual Studio 11.0/VC 以下から
+    vcvarsall.bat
+    bin/vcvars32.bat
+    bin/amd64/vcvars64.bat
+    bin/amd64/vcvarsx86_amd64.bat
+    bin/amd64/vcvarsx86_arm.bat
+   をディレクトリ構造を保ったままコピーします。
+   また、このリポジトリのファイル(batが1つとパッチが5つ)をディレクトリ構造を保ったまま
+   同様にコピーします。
+
+3. batにパッチを当てます
+   2でコピーしたbatにパッチを当てます。
+   長くなるので日本語での説明に留めますが、
+    vcvarsall.batにはset_installdir.batのcallを
+    それ以外のファイルにはCTPのbinとincludeへのパスをMSVC11.0よりも優先度の高い位置に設定
+   するようにします。また、このとき環境変数%CTPINSTALLDIR%に
+   CTPのインストールディレクトリのパスが格納されます。
+
+4. 使う
+   後はbjamでtoolset=msvc-12.0とすれば動くはずです。たぶん。
