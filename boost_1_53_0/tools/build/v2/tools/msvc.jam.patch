@@ -1,0 +1,4 @@
+654a655,657
+>         local vc-path ;
+>         vc-path = [ path.join [ path.make-NT "C:\\Program Files (x86)\\Microsoft Visual C++ Compiler Nov 2012 CTP" ] "bin" ] ;
+>         register-configuration 12.0 : [ path.native $(vc-path[1]) ] ;
